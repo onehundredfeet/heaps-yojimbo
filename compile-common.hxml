@@ -1,0 +1,7 @@
+-lib hl-idl
+-lib hvector
+-lib heaps
+-lib hxbit
+-lib hl-yojimbo
+--class-path tests
+--class-path src

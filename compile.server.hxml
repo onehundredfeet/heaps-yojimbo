@@ -1,0 +1,3 @@
+compile-common.hxml
+-hl bin/server.hl
+--main test.Server
