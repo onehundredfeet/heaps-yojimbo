@@ -7,6 +7,11 @@ final  ProtocolId = 0x11223344; //.make(,0x556677);
 final ClientPort = 30000;
 final ServerPort = 40000;
 
+class Input extends haxe.io.Input {
+    public override function readByte():Int {
+		return 0;
+	}
+}
 
 /*
 ChannelConfig() : type ( CHANNEL_TYPE_RELIABLE_ORDERED )
