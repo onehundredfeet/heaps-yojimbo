@@ -15,6 +15,7 @@ class ClientConnection extends hxbit.NetworkHost.NetworkClient {
 	}
 	override function send( bytes : haxe.io.Bytes ) {
         var m = _server.createMessage(_clientIdx);
+		m.setPayload( bytes.getData(), bytes.length );
         _server.sendMessage(_clientIdx, 0, m);
 
 	}
