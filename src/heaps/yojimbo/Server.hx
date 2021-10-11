@@ -4,7 +4,9 @@ import haxe.io.UInt8Array;
 class ClientConnection extends hxbit.NetworkHost.NetworkClient {
     var _server : yojimbo.Native.Server;
     var _clientIdx : Int;
-
+	public function ID() : Int {
+		return _clientIdx;
+	}
 	public function new(host : Server, server : yojimbo.Native.Server, idx) {
 		super(host);
         _server = server;
@@ -72,6 +74,7 @@ class Server extends Host {
     
     static final MaxClients = 10;
     var clientsIdx : Array<Int> = [];
+	var _clients : Array<ClientConnection> = [];
 
 	public function new() {
 		super();
@@ -95,7 +98,6 @@ class Server extends Host {
 
     function incomingUpdate(time : Float, dt : Float) {
         _server.receivePackets();
-
         _server.advanceTime( time );
 
         if ( !_server.isRunning() )
@@ -105,11 +107,22 @@ class Server extends Host {
             trace("Remaining " + _adapter.incomingEventCount());
 
             if (_adapter.getEventType() == yojimbo.Native.HLEventType.HLYOJIMBO_CLIENT_CONNECT) {
-                trace("Client conected " + _adapter.getClientIndex());
-                clientsIdx.push(_adapter.getClientIndex());
+				var cid = _adapter.getClientIndex();
+                trace("Client conected " + cid);
+                clientsIdx.push(cid);
+				var c = new ClientConnection(this, _server, cid);
+				_clients.push(c);
+				
             } else if (_adapter.getEventType() == yojimbo.Native.HLEventType.HLYOJIMBO_CLIENT_DISCONNECT) {
-                trace("Client disconected " + _adapter.getClientIndex());
-                clientsIdx.remove(_adapter.getClientIndex());
+				var cid = _adapter.getClientIndex();
+                trace("Client disconected " + cid);
+                clientsIdx.remove(cid);
+				for(c in _clients) {
+					if (c.ID() == cid) {
+						_clients.remove(c);
+						break;
+					}
+				}
             } else {
                 trace("Unknown event " + _adapter.getEventType());
             }
@@ -140,9 +153,7 @@ class Server extends Host {
 	}
 	
 
-	public function wait( host : String, port : Int, ?onConnected : hxbit.NetworkHost.NetworkClient -> Void ) {
-		
-	}
+
 	/*
     
 	var socket : Socket;
