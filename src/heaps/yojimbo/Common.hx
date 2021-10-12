@@ -46,45 +46,6 @@ class User implements hxbit.Serializable {
     @:s public var friends : Array<User>;    
 }
 
-class Player implements hxbit.NetworkSerializable {
-    @:s var color : Int;
-	@:s public var uid : Int;
-    @:s var name : String;
-
-    public function networkAllow( op : hxbit.NetworkSerializable.Operation, propId : Int, client : hxbit.NetworkSerializable ) : Bool {
-		return client == this;
-	}
-    
-    // source initialization
-    public function new ( c, id ) {
-        enableReplication = true;
-        color = c;
-        uid = id;
-        init();
-    }
-
-    // shared initialization
-    public function init() {
-
-    }
-
-    // NetworkSerializable init
-    public function alive() {
-		init();
-
-        Client.onPlayer(this);
-
-        /*
-		// refresh bmp
-		this.x = x;
-		this.y = y;
-		if( uid == net.uid ) {
-			net.cursor = this;
-			net.host.self.ownerObject = this;
-		}
-        */
-	}
-}
 
 class Cursor implements hxbit.NetworkSerializable {
 

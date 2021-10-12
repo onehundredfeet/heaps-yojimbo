@@ -1,7 +1,6 @@
 package heaps.yojimbo;
 import haxe.crypto.Base64;
 import hl.Bytes;
-import heaps.yojimbo.Common.Player;
 import haxe.io.UInt8Array;
 
 class ClientConnection extends hxbit.NetworkHost.NetworkClient {
@@ -52,6 +51,7 @@ class Server extends Host {
     var _server : yojimbo.Native.Server;
 	var _allocator : yojimbo.Native.Allocator;
 
+	public var onClientConnected : ( c : ClientConnection) -> Void;
     static var privateKeyArrayInt : Array<Int> = [ 0x60, 0x6a, 0xbe, 0x6e, 0xc9, 0x19, 0x10, 0xea, 
         0x9a, 0x65, 0x62, 0xf6, 0x6f, 0x2b, 0x30, 0xe4, 
         0x43, 0x71, 0xd6, 0x2c, 0xd1, 0x99, 0x27, 0x26,
@@ -93,12 +93,6 @@ class Server extends Host {
 		haxe.Log.trace(s, pos);
 	}
 	
-	function onClientConnect( c : ClientConnection) {
-		log("Client identified ("+c.IDX()+"," + c.ID() + ")");
-		var p = new Player(0x0000FF, c.ID());
-		c.ownerObject = p;
-		c.sync();
-	}
 
     public function incomingUpdate(time : Float, dt : Float) {
         _server.receivePackets();
@@ -117,8 +111,9 @@ class Server extends Host {
 				var c = new ClientConnection(this, _server, cid);
 				_clients.push(c);
 				pendingClients.push(c);
-				onClientConnect(c);
-				
+				if (onClientConnected != null) {
+					onClientConnected( c );
+				}
             } else if (_adapter.getEventType() == yojimbo.Native.HLEventType.HLYOJIMBO_CLIENT_DISCONNECT) {
 				var cid = _adapter.getClientIndex();
                 trace("Client disconected " + cid);

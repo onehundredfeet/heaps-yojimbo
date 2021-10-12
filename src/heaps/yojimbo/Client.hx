@@ -52,16 +52,15 @@ class Client extends Host {
 	var _client : yojimbo.Native.Client;
 	var _connected = false;
 	var _connection : ServerConnection;
-	var _player : Player;
 
 	static var  _self : Client;
-	public static function onPlayer( p : Player ) {
-		if (_self != null && _self._player == null) {
-			if (p.uid == _self._clientID) {
-				_self._connection.ownerObject = p;
-				_self._player = p;
-			}
-		}
+	
+	public function id() {
+		return _clientID;
+	}
+
+	public function connection() : ServerConnection {
+		return _connection;
 	}
 	public function new(clientID) {
 		super();
