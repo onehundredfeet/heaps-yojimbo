@@ -1,0 +1,94 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "haxe",
+			"args": "active configuration",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "Flash (debug)",
+			"command": "haxe",
+			"args": [
+				"build.hxml",
+				"-swf",
+				"export/run.swf",
+				"-D",
+				"fdb"
+			],
+			"problemMatcher": [
+				"$haxe-absolute",
+				"$haxe",
+				"$haxe-error",
+				"$haxe-trace"
+			]
+		},
+		{
+			"label": "JS (debug)",
+			"command": "haxe",
+			"args": [
+				"build.hxml",
+				"-js",
+				"export/run.js",
+				"-lib",
+				"hxnodejs"
+			],
+			"problemMatcher": [
+				"$haxe-absolute",
+				"$haxe",
+				"$haxe-error",
+				"$haxe-trace"
+			]
+		},
+		{
+			"label": "C++ (debug)",
+			"command": "haxe",
+			"args": [
+				"build.hxml",
+				"-cpp",
+				"export/cpp",
+				"-lib",
+				"hxcpp-debug-server"
+			],
+			"problemMatcher": [
+				"$haxe-absolute",
+				"$haxe",
+				"$haxe-error",
+				"$haxe-trace"
+			]
+		},
+		{
+			"label": "HL/JIT (client)",
+			"command": "haxe",
+			"args": [
+				"--connect",
+				"6001",
+				"compile.client.hxml",
+			],
+			"problemMatcher": [
+				"$haxe-absolute",
+				"$haxe",
+				"$haxe-error",
+				"$haxe-trace"
+			]
+		},
+        {
+			"label": "HL/JIT (server)",
+			"command": "haxe",
+			"args": [
+				"--connect",
+				"6001",
+				"compile.server.hxml",
+			],
+			"problemMatcher": [
+				"$haxe-absolute",
+				"$haxe",
+				"$haxe-error",
+				"$haxe-trace"
+			]
+		}
+	]
+}

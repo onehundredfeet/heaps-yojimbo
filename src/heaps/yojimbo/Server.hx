@@ -1,22 +1,32 @@
 package heaps.yojimbo;
+import haxe.crypto.Base64;
+import hl.Bytes;
 import heaps.yojimbo.Common.Player;
 import haxe.io.UInt8Array;
 
 class ClientConnection extends hxbit.NetworkHost.NetworkClient {
     var _server : yojimbo.Native.Server;
     var _clientIdx : Int;
-	public function ID() : Int {
+	var _clientID : Int;
+
+	public function IDX() : Int {
 		return _clientIdx;
 	}
+	public function ID() : Int {
+		return _clientID;
+	}
+	
 	public function new(host : Server, server : yojimbo.Native.Server, idx) {
 		super(host);
         _server = server;
         _clientIdx = idx;
+		_clientID = server.getClientId(idx);
 	}
 	override function error(msg:String) {
 		super.error(msg);
 	}
 	override function send( bytes : haxe.io.Bytes ) {
+		trace("Sending to client '" + Base64.encode(bytes) + "'");
         var m = _server.createMessage(_clientIdx);
 		m.setPayload( bytes.getData(), bytes.length );
         _server.sendMessage(_clientIdx, 0, m);
@@ -25,7 +35,13 @@ class ClientConnection extends hxbit.NetworkHost.NetworkClient {
 	override function stop() {
 	}
 	public function process(m : yojimbo.Native.Message,  channel = 0) {
-		trace("Message from client " + _clientIdx);
+		
+		var len = -1;
+		var b : Bytes = m.accessPayload(len);
+		var bytes = b.toBytes(len);
+		trace("Message from client: " + _clientIdx + " len: " + len);
+
+//		this.processMessage(bytes,0);
 	}
 
 }
@@ -47,13 +63,6 @@ class Server extends Host {
     var clientsIdx : Array<Int> = [];
 	var _clients : Array<ClientConnection> = [];
 
-	function getClient(id ) {
-		for(c in _clients) {
-			if(c.ID() == id)
-				return c;
-		}
-		return null;
-	}
 	public function new() {
 		super();
 		isAuth = true;
@@ -76,6 +85,8 @@ class Server extends Host {
 
 		trace("Starting");
         _server.start( MaxClients );
+
+		this.makeAlive();
     }
 	public function log( s : String, ?pos : haxe.PosInfos ) {
 		pos.fileName = (isAuth ? "[S]" : "[C]") + " " + pos.fileName;
@@ -83,7 +94,7 @@ class Server extends Host {
 	}
 	
 	function onClientConnect( c : ClientConnection) {
-		log("Client identified ("+c.ID()+")");
+		log("Client identified ("+c.IDX()+"," + c.ID() + ")");
 		var p = new Player(0x0000FF, c.ID());
 		c.ownerObject = p;
 		c.sync();
@@ -113,7 +124,7 @@ class Server extends Host {
                 trace("Client disconected " + cid);
                 clientsIdx.remove(cid);
 				for(c in _clients) {
-					if (c.ID() == cid) {
+					if (c.IDX() == cid) {
 						c.stop();
 						_clients.remove(c);
 						break;
@@ -129,10 +140,10 @@ class Server extends Host {
             
             var m : yojimbo.Native.Message = null;
 
-            while ((m = _server.receiveMessage(c.ID(), 0)) != null) {
+            while ((m = _server.receiveMessage(c.IDX(), 0)) != null) {
 				c.process(m,0);
 				m.dispose();
-                _server.releaseMessage(c.ID(),m);
+                _server.releaseMessage(c.IDX(),m);
             }
         }
     }

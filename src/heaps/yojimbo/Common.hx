@@ -37,6 +37,9 @@ function loadCertificate(cert_file) : haxe.io.Bytes{
     return certBytes;
 }
 
+
+
+
 class User implements hxbit.Serializable {
     @:s public var name : String;
     @:s public var age : Int;
@@ -68,6 +71,9 @@ class Player implements hxbit.NetworkSerializable {
     // NetworkSerializable init
     public function alive() {
 		init();
+
+        Client.onPlayer(this);
+
         /*
 		// refresh bmp
 		this.x = x;

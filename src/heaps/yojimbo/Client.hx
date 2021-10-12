@@ -1,5 +1,6 @@
 package heaps.yojimbo;
 
+import haxe.crypto.Base64;
 import yojimbo.Native;
 import heaps.yojimbo.Common;
 
@@ -27,7 +28,17 @@ class ServerConnection extends hxbit.NetworkHost.NetworkClient {
 		_client.disconnect();
 	}
 	public function process(m : yojimbo.Native.Message,  channel = 0) {
-		trace("Message from server " + m );
+		var len = -1;
+		var b : hl.Bytes = m.accessPayload(len);
+		var bytes = b.toBytes(len);
+		if (len > 0 && b != null) {
+			var input = new haxe.io.BytesInput(bytes, 0, len);
+			this.processMessagesData(bytes, 0, len);
+			trace('message from server on channel ${channel} len: ${len} msg: ${Base64.encode(bytes)}' );
+		} else {
+			trace("Empty bytes?");
+		}
+		
 	}
 }
 
@@ -41,13 +52,24 @@ class Client extends Host {
 	var _client : yojimbo.Native.Client;
 	var _connected = false;
 	var _connection : ServerConnection;
+	var _player : Player;
 
+	static var  _self : Client;
+	public static function onPlayer( p : Player ) {
+		if (_self != null && _self._player == null) {
+			if (p.uid == _self._clientID) {
+				_self._connection.ownerObject = p;
+				_self._player = p;
+			}
+		}
+	}
 	public function new(clientID) {
 		super();
 		Common.initialize();
 		_allocator = yojimbo.Native.Allocator.getDefault();
 		_adapter = new Adapter();
 		_clientID = clientID;
+		_self = this;
 	}
 
 
@@ -118,7 +140,6 @@ class Client extends Host {
 
 	function onConnection() {
 		trace("WHEEEEE");
-		
 	}
 	public function incomingUpdate(time, dt : Float) : Bool{
 
@@ -153,9 +174,11 @@ class Client extends Host {
 				clients = [_connection];
 				onConnection();
 			}
-            var m : Message = _client.receiveMessage(0);
+
+			var channel = 0;
+            var m : Message = _client.receiveMessage(channel);
             while (m != null) {
-				_connection.process(m,0);
+				_connection.process(m,channel);
 				m.dispose();
                 _client.releaseMessage(m);
                 m = _client.receiveMessage(0);
