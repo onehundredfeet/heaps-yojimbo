@@ -25,7 +25,7 @@ class ClientConnection extends hxbit.NetworkHost.NetworkClient {
 		super.error(msg);
 	}
 	override function send( bytes : haxe.io.Bytes ) {
-		trace("Sending to client '" + Base64.encode(bytes) + "'");
+//		trace("Sending to client '" + Base64.encode(bytes) + "'");
         var m = _server.createMessage(_clientIdx);
 		m.setPayload( bytes.getData(), bytes.length );
         _server.sendMessage(_clientIdx, 0, m);
@@ -33,12 +33,27 @@ class ClientConnection extends hxbit.NetworkHost.NetworkClient {
 	}
 	override function stop() {
 	}
+
 	public function process(m : yojimbo.Native.Message,  channel = 0) {
+		var len = -1;
+		var b : hl.Bytes = m.accessPayload(len);
+		var bytes = b.toBytes(len);
+		if (len > 0 && b != null) {
+		//	trace("Processing bytes of length " + bytes.length);
+		//	trace('message from client ${_clientID} on channel ${channel} len: ${len} msg: ${Base64.encode(bytes)}' );
+			this.processMessagesData(bytes, 0, len);
+		} else {
+			trace("Empty bytes?");
+		}
+		
+	}
+
+	public function processOld(m : yojimbo.Native.Message,  channel = 0) {
 		
 		var len = -1;
 		var b : Bytes = m.accessPayload(len);
 		var bytes = b.toBytes(len);
-		trace("Message from client: " + _clientIdx + " len: " + len);
+		//trace("Message from client: " + _clientIdx + " len: " + len);
 
 //		this.processMessage(bytes,0);
 	}
@@ -66,13 +81,13 @@ class Server extends Host {
 	public function new() {
 		super();
 		isAuth = true;
-		trace("New");
+//		trace("New");
 		Common.initialize();
 		_allocator = yojimbo.Native.Allocator.getDefault();
 	}
 
     public function start(host : String, port : Int) {
-		trace("Start");
+//		trace("Start");
         var address = new yojimbo.Native.Address( host, port );
         var time = 100.0;
         
@@ -102,7 +117,7 @@ class Server extends Host {
             return;
 
         if (_adapter.dequeue()) { 
-            trace("Remaining " + _adapter.incomingEventCount());
+//            trace("Remaining " + _adapter.incomingEventCount());
 
             if (_adapter.getEventType() == yojimbo.Native.HLEventType.HLYOJIMBO_CLIENT_CONNECT) {
 				var cid = _adapter.getClientIndex();
@@ -135,8 +150,10 @@ class Server extends Host {
             
             var m : yojimbo.Native.Message = null;
 
-            while ((m = _server.receiveMessage(c.IDX(), 0)) != null) {
-				c.process(m,0);
+			final channel = 0;
+            while ((m = _server.receiveMessage(c.IDX(), channel)) != null) {
+//				trace('Receved message from client ${c.ID()}');
+				c.process(m,channel);
 				m.dispose();
                 _server.releaseMessage(c.IDX(),m);
             }
@@ -144,6 +161,7 @@ class Server extends Host {
     }
 
     public function outgoingUpdate() {
+		flush();
         _server.sendPackets();
     }
 	public function stop() {

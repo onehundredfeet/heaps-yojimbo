@@ -16,12 +16,16 @@ class ServerConnection extends hxbit.NetworkHost.NetworkClient {
 		super.error(msg);
 	}
 	override function send( bytes : haxe.io.Bytes ) {
+		//trace ("Sending?");
 		sendOnChannel(bytes, _channel);
 	}
-	public function sendOnChannel( bytes : haxe.io.Bytes,  channel ) {
+	public function sendOnChannel( bytes : haxe.io.Bytes,  channel : Int) {
+		//trace('Sending to server on channel ${channel} len: ${bytes.length} msg: ${Base64.encode(bytes)}' );
+
 		var m = _client.createMessage(0); // What should the type be used for?  Should probably be removed
 		m.setPayload( bytes.getData(), bytes.length );
         _client.sendMessage(channel, m);
+		//trace("Done sending message");
 	}
 	override function stop() {
 		super.stop();
@@ -34,7 +38,7 @@ class ServerConnection extends hxbit.NetworkHost.NetworkClient {
 		if (len > 0 && b != null) {
 			var input = new haxe.io.BytesInput(bytes, 0, len);
 			this.processMessagesData(bytes, 0, len);
-			trace('message from server on channel ${channel} len: ${len} msg: ${Base64.encode(bytes)}' );
+			//trace('message from server on channel ${channel} len: ${len} msg: ${Base64.encode(bytes)}' );
 		} else {
 			trace("Empty bytes?");
 		}
@@ -107,7 +111,7 @@ class Client extends Host {
 		var address = new Address("0.0.0.0", ClientPort);
 
 		_client = new yojimbo.Native.Client(_allocator, address, config, _adapter, time);
-
+		
 		var serverAddress = new Address("127.0.0.1", ServerPort);
 		trace("Connecting to (doesn't matter - secure connections get it from the connect token) " + serverAddress.toString());
 
@@ -138,7 +142,7 @@ class Client extends Host {
 	}
 
 	function onConnection() {
-		trace("WHEEEEE");
+		
 	}
 	public function incomingUpdate(time, dt : Float) : Bool{
 
@@ -170,6 +174,7 @@ class Client extends Host {
 			if (!_connected) {
 				_connected = true;
 				_connection = new ServerConnection(this, _client, 0);
+				self = _connection;
 				clients = [_connection];
 				onConnection();
 			}
@@ -188,6 +193,7 @@ class Client extends Host {
 	}
 
 	public function outgoingUpdate() {
+		flush();
 		_client.sendPackets();
 	}
 

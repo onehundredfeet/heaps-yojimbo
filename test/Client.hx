@@ -11,7 +11,11 @@ class Client {
     public static function onPlayer(p : Player) {
         if (_player == null) {
           if (p.uid == _client.id()) {
-            _client.connection().ownerObject = p;
+            // I'm unclear as to why these are two separate paths.
+            // the self is entirely internally allocated
+            _client.connection().ownerObject = p; 
+            _client.self.ownerObject = p;
+
             _player = p;
           }
         }
@@ -39,9 +43,14 @@ class Client {
 
         while(true) {
           _client.incomingUpdate( time, dt );
-          _client.outgoingUpdate();
+         
             Sys.sleep(dt);
             time += dt;
+
+            if (_player != null) {
+              _player.move(time * 0.1, time * -0.1);
+            }
+            _client.outgoingUpdate();
         }
 
         _client.close();

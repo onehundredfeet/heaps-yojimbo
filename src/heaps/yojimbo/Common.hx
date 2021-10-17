@@ -4,6 +4,7 @@ package heaps.yojimbo;
 import yojimbo.Native;
 import sys.io.File;
 import  haxe.crypto.Base64;
+import Float2;
 
 final  ProtocolId = 0x11223344; //.make(,0x556677);
 final ClientPort = 30000;
@@ -37,8 +38,95 @@ function loadCertificate(cert_file) : haxe.io.Bytes{
     return certBytes;
 }
 
+class Float2Serializable implements hxbit.Serializable  {
+    public function new (x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    @:s public var x : Float;
+    @:s public var y : Float;
 
+    @:from
+    static public function fromFloat2(v : Float2) {
+      return new Float2Serializable(v.x, v.y);
+    }
+  
+    @:to
+    public function toFloat2() {
+      return new Float2( x, y );
+    }
 
+}
+
+class QuantizedVector2 implements hxbit.Serializable  {
+
+    final MAX_INTF : Float;
+    final MAX_INT : Int;
+    
+    public function new (x, y, ox, oy, sizex, sizey, bits) {
+        if (bits > 16) bits = 16;
+        
+        this.bits = bits;
+        MAX_INTF  = ((1 << bits) - 1);
+        MAX_INT = ((1 << bits) - 1);
+        this.x = x;
+        this.y = y;
+
+        originx = ox;
+        originy = oy;
+
+        downscalex = MAX_INTF / sizex;
+        downscaley = MAX_INTF / sizey;
+        upscalex =  sizex / MAX_INTF;
+        upscaley =  sizey / MAX_INTF;
+    }
+
+    public function set( x, y ) {
+        this.x = Math.floor((x - originx) * downscalex);
+        this.y = Math.floor((y - originy) * downscaley);
+        
+       if (this.x < 0) this.x = 0;
+       if (this.y < 0) this.y = 0;
+       if (this.x > MAX_INT) this.x = MAX_INT;
+       if (this.y > MAX_INT) this.y = MAX_INT;
+    }
+
+    var bits : Int;
+     var x : Int;
+     var y : Int;
+     var originx : Float;
+     var originy : Float;
+     var downscalex : Float;
+     var downscaley : Float;
+     var upscalex : Float;
+     var upscaley : Float;
+
+    
+    @:to
+    public function toFloat2() {
+        var xf = cast(x,Float) * upscalex + originx;
+        var yf = cast(y,Float) * upscaley + originy;
+        return new Float2( xf, yf );
+    }
+
+    @:keep
+    public function customSerialize(ctx : hxbit.Serializer) {
+        if (bits > 8) ctx.addByte((x >> 8) & 0xff );
+        ctx.addByte(x & 0xff );
+        if (bits > 8) ctx.addByte((y >> 8) & 0xff );
+        ctx.addByte(y & 0xff );
+    }
+
+    @:keep
+    public function customUnserialize(ctx : hxbit.Serializer) {
+        var hbx = (bits > 8) ? ctx.getByte() : 0;
+        var lbx = ctx.getByte();
+        x = hbx << 8 | lbx;
+        var hby = (bits > 8) ? ctx.getByte() : 0;
+        var lby = ctx.getByte();
+        y = hby << 8 | lby;
+    }
+}
 
 class User implements hxbit.Serializable {
     @:s public var name : String;

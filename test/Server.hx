@@ -15,7 +15,7 @@ class Server {
 
         server.onClientConnected = function (c) {
             trace("Client identified ("+c.IDX()+"," + c.ID() + ")");
-            var p = new Player(0x0000FF, c.ID());
+            var p = new Player(0x0000FF, c.ID(), Std.random(100),Std.random(100));
             c.ownerObject = p;
             c.sync();
         }
