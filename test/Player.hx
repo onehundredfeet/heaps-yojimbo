@@ -1,5 +1,7 @@
 package test;
 
+import heaps.yojimbo.Common.compressFloat;
+import heaps.yojimbo.Common.decompressFloat;
 import haxe.EnumTools;
 
 
@@ -38,9 +40,26 @@ class Player implements hxbit.NetworkSerializable {
         Client.onPlayer(this);
 	}
 
-    @:rpc(immediate) public function move( x : Float, y : Float) {
-        trace("Moving...");
-        this.x = x;
-        this.y = y;
+    static final DOMAIN = 10000.;
+    static final ORIGIN =  - DOMAIN / 2.;
+    static final BITS = 25;
+
+    static final ADOMAIN = Math.PI * 2.;
+    static final ABITS = 14;
+
+
+    public function moveF( x : Float, y : Float, a : Float) {
+        move( compressFloat(x, ORIGIN, DOMAIN, BITS),compressFloat(y, ORIGIN, DOMAIN, BITS), compressFloat(AngleF.bound(a), 0., ADOMAIN, ABITS) );
+    }
+
+    @:rpc(immediate) public function move( x : Int, y : Int, a : Int) {
+        var xf = decompressFloat(x, ORIGIN, DOMAIN, BITS);
+        var yf = decompressFloat(y, ORIGIN, DOMAIN, BITS);
+        var af = decompressFloat(a, 0., ADOMAIN, ABITS);
+        
+        trace('Moving... xi ${x} xf ${xf} yi ${y} yf ${yf} a ${a} af ${af}');
+        this.x = xf;
+        this.y = yf;
+        this.angle = af;
      }
 }

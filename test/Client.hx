@@ -1,5 +1,6 @@
 package test;
 
+import heaps.yojimbo.Common.compressFloat;
 import heaps.yojimbo.Common.loadCertificate;
 import hxd.Rand;
 
@@ -48,7 +49,7 @@ class Client {
             time += dt;
 
             if (_player != null) {
-              _player.move(time * 0.1, time * -0.1);
+              _player.moveF(time * 0.1, time * -0.1, AngleF.fromDeg(time));
             }
             _client.outgoingUpdate();
         }
