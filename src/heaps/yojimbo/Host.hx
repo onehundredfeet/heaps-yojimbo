@@ -8,13 +8,11 @@ class Host extends hxbit.NetworkHost {
 
 	public function new () {
 		if (hxbit.NetworkHost.current != null) {
-			throw "Can not have more than one host";
+//			throw "Can not have more than one host";
 		}
 		
 		super();
 		config = getConfig();
-
-		
 	}
 
 	function getConfig() : yojimbo.Native.ClientServerConfig {

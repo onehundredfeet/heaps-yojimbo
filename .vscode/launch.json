@@ -20,5 +20,14 @@
 			"cwd": "${workspaceFolder}",
 			"program": "bin/server.hl"
 		},
+		{
+			"name": "Loopback",
+			"type": "hl",
+			"request": "launch",
+			"preLaunchTask": "HL/JIT (loopback)",
+			"hxml": "compile.loopback.hxml",
+			"cwd": "${workspaceFolder}",
+			"program": "bin/loopback.hl"
+		},
 	]
 }

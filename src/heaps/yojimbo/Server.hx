@@ -1,4 +1,5 @@
 package heaps.yojimbo;
+import heaps.yojimbo.Common.ClientPort;
 import haxe.crypto.Base64;
 import hl.Bytes;
 import haxe.io.UInt8Array;
@@ -65,6 +66,7 @@ class Server extends Host {
     var _adapter : yojimbo.Native.Adapter;
     var _server : yojimbo.Native.Server;
 	var _allocator : yojimbo.Native.Allocator;
+	var _loopbackClient : yojimbo.Native.Client;
 
 	public var onClientConnected : ( c : ClientConnection) -> Void;
     static var privateKeyArrayInt : Array<Int> = [ 0x60, 0x6a, 0xbe, 0x6e, 0xc9, 0x19, 0x10, 0xea, 
@@ -86,11 +88,9 @@ class Server extends Host {
 		_allocator = yojimbo.Native.Allocator.getDefault();
 	}
 
-    public function start(host : String, port : Int) {
+    public function start(host : String, port : Int, time : Float) {
 //		trace("Start");
         var address = new yojimbo.Native.Address( host, port );
-        var time = 100.0;
-        
 		
         _adapter = new yojimbo.Native.Adapter();
 
@@ -103,6 +103,22 @@ class Server extends Host {
 
 		this.makeAlive();
     }
+
+	public function startLookupback( clientID, time : Float) {
+		var address = new yojimbo.Native.Address( "0.0.0.0", ClientPort );
+		_loopbackClient = new yojimbo.Native.Client(_allocator, address, config, _adapter, time );
+
+		_adapter.bindLoopbackClient(_loopbackClient);
+		_adapter.bindLoopbackServer(_server);
+
+		var c = new Client.LoopbackClient(_loopbackClient);
+
+		_loopbackClient.connectLoopback(0, clientID, MaxClients);
+		_server.connectLoopbackClient(0, clientID, null);
+
+		return c;
+	}
+
 	public function log( s : String, ?pos : haxe.PosInfos ) {
 		pos.fileName = (isAuth ? "[S]" : "[C]") + " " + pos.fileName;
 		haxe.Log.trace(s, pos);
@@ -110,6 +126,10 @@ class Server extends Host {
 	
 
     public function incomingUpdate(time : Float, dt : Float) {
+		if (_loopbackClient != null) {
+			_loopbackClient.receivePackets();
+			_loopbackClient.advanceTime(time);
+		}
         _server.receivePackets();
         _server.advanceTime( time );
 

@@ -5,7 +5,7 @@ import heaps.yojimbo.Common.decompressFloat;
 import haxe.EnumTools;
 
 
-class Player implements hxbit.NetworkSerializable {
+class Player extends heaps.yojimbo.Common.NetSerializable {
     @:s var color : Int;
 	@:s public var uid : Int;
     @:s var name : String;
@@ -13,14 +13,16 @@ class Player implements hxbit.NetworkSerializable {
     @:s var y : Float;
     @:s var angle : Float;
 
-    public function networkAllow( op : hxbit.NetworkSerializable.Operation, propId : Int, owner : hxbit.NetworkSerializable ) : Bool {
+    public static var onPlayer : (Player) -> Void;
+
+    public override function networkAllow( op : hxbit.NetworkSerializable.Operation, propId : Int, owner : hxbit.NetworkSerializable ) : Bool {
         //trace ('Is allowed? ${op}');
 		return owner == this;
 	}
     
     // source initialization
     public function new ( c, id, x, y ) {
-        enableReplication = true;
+        super();
         color = c;
         uid = id;
         this.x = x;
@@ -35,9 +37,14 @@ class Player implements hxbit.NetworkSerializable {
     }
 
     // NetworkSerializable init
-    public function alive() {
+    public override function alive() {
+        super.alive();
 		init();
-        Client.onPlayer(this);
+
+        if (onPlayer != null) {
+            onPlayer(this);
+        }
+
 	}
 
     static final DOMAIN = 10000.;

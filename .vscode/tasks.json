@@ -89,6 +89,21 @@
 				"$haxe-error",
 				"$haxe-trace"
 			]
+		},
+        {
+			"label": "HL/JIT (loopback)",
+			"command": "haxe",
+			"args": [
+				"--connect",
+				"6001",
+				"compile.loopback.hxml",
+			],
+			"problemMatcher": [
+				"$haxe-absolute",
+				"$haxe",
+				"$haxe-error",
+				"$haxe-trace"
+			]
 		}
 	]
 }

@@ -146,28 +146,44 @@ class User implements hxbit.Serializable {
     @:s public var friends : Array<User>;    
 }
 
+/*
+	static function enableReplication( o : NetworkSerializable, b : Bool ) {
+		if( b ) {
+			if( o.__host != null ) return;
+			if( current == null ) throw "No NetworkHost defined";
+			current.register(o);
+		} else {
+			if( o.__host == null ) return;
+			o.__host.unregister(o);
+		}
+	}
+*/
+class NetSerializable implements hxbit.NetworkSerializable {
+    public function startReplication(h : Host) {
+        __host = h;
+        h.register(this);
+    }
+    public function stopReplication() {
+        __host.register(this);
+        __host = null;
+    }
+}
 
-class Cursor implements hxbit.NetworkSerializable {
+class Cursor extends NetSerializable {
 
 	@:s var color : Int;
 	@:s public var uid : Int;
 	@:s public var x(default, set) : Float;
 	@:s public var y(default, set) : Float;
 
-
-    // source initialization
-    public function new ( ) {
-        enableReplication = true;
-    }
-
-    
     // shared initialization
     public function init() {
 
     }
 
     // NetworkSerializable init
-    public function alive() {
+    public override function alive() {
+        super.alive();
 		init();
 		// refresh bmp
 		this.x = x;
@@ -180,7 +196,7 @@ class Cursor implements hxbit.NetworkSerializable {
         */
 	}
 
-    public function networkAllow( op : hxbit.NetworkSerializable.Operation, propId : Int, client : hxbit.NetworkSerializable ) : Bool {
+    public override function networkAllow( op : hxbit.NetworkSerializable.Operation, propId : Int, client : hxbit.NetworkSerializable ) : Bool {
 		return client == this;
 	}
 
@@ -200,6 +216,8 @@ class Cursor implements hxbit.NetworkSerializable {
 	}
 
 }
+
+
 
 /*
 ChannelConfig() : type ( CHANNEL_TYPE_RELIABLE_ORDERED )

@@ -1,6 +1,6 @@
 package test;
 
-class Server {
+class LoopbackServer {
 
     public static function main() {
 
@@ -13,16 +13,28 @@ class Server {
         var time = 0.;
         var dt = 0.1;
 
+        var splayer : Player;
+        var cplayer : Player;
+
         server.onClientConnected = function (c) {
             trace("Client identified ("+c.IDX()+"," + c.ID() + ")");
-            var p = new Player(0x0000FF, c.ID(), Std.random(100),Std.random(100));
-            c.ownerObject = p;
+            splayer = new Player(0x0000FF, c.ID(), Std.random(100),Std.random(100));
+            splayer.startReplication( server );
+            c.ownerObject = splayer;
             c.sync();
         }
 
+        Player.onPlayer = function(p) {
+            trace("Created client side player");
+            cplayer = p;
+        }
+        
         server.start("127.0.0.1", heaps.yojimbo.Common.ServerPort, time);
+        var client = server.startLookupback(0, time);
         
         while(true) {
+            client.incomingUpdate( time, dt);
+            client.outgoingUpdate();
             server.incomingUpdate( time, dt );
             server.outgoingUpdate();
             Sys.sleep(dt);
