@@ -1,0 +1,11 @@
+{
+	"name" : "heaps-yojimbo",
+	"url" : "https://github.com/onehundredfeet/heaps-yojimbo",
+	"license" : "MIT",
+	"contributors" : ["onehundredfeet"],
+	"description" : "Yojimbo support for Heaps.",
+	"version" : "0.1.0",
+	"releasenote" : "",
+	"classPath": "src/",
+	"dependencies": { "hl-idl" : "", "hl-yojimbo" : ""}
+}

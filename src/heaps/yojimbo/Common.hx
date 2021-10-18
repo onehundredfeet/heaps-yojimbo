@@ -139,6 +139,7 @@ class QuantizedVector2 implements hxbit.Serializable  {
     }
 }
 
+
 class User implements hxbit.Serializable {
     @:s public var name : String;
     @:s public var age : Int;
