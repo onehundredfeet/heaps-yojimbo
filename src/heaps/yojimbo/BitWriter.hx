@@ -11,11 +11,13 @@ class BitWriter {
 		return _out.getBytes();
 	}
 	public function new(b:haxe.io.BytesBuffer = null) {
+
 		if (b == null) {
 			_out = new haxe.io.BytesBuffer();
 		} else {
 			_out = b;
 		}
+		
 	}
 
 	public function bind(b:haxe.io.BytesBuffer) {
