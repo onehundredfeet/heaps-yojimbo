@@ -84,6 +84,5 @@ class Signals {
         testSignals();
 
         trace("Done");
-        Sys.exit(0);
     }
 }

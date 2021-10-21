@@ -4,7 +4,7 @@ import haxe.crypto.Base64;
 import yojimbo.Native;
 import heaps.yojimbo.Common;
 
-class ServerConnection extends hxbit.NetworkHost.NetworkClient {
+class ServerConnection extends ConnectionBase {
 	var _client : yojimbo.Native.Client;
 	var _channel : Int;
 	public function new(host : ClientBase, client: yojimbo.Native.Client, channel = 0 ) {
@@ -20,9 +20,12 @@ class ServerConnection extends hxbit.NetworkHost.NetworkClient {
 		sendOnChannel(bytes, _channel);
 	}
 	public function sendOnChannel( bytes : haxe.io.Bytes,  channel : Int) {
-		//trace('Sending to server on channel ${channel} len: ${bytes.length} msg: ${Base64.encode(bytes)}' );
+		sendMsg(MT_HEAPS, bytes, channel);
+	}
 
-		var m = _client.createMessage(0); // What should the type be used for?  Should probably be removed
+	public function sendMsg( msgType : Int, bytes : haxe.io.Bytes,  channel : Int) {
+		//trace('Sending to server on channel ${channel} len: ${bytes.length} msg: ${Base64.encode(bytes)}' );
+		var m = _client.createMessage(msgType); // What should the type be used for?  Should probably be removed
 		m.setPayload( bytes.getData(), bytes.length );
         _client.sendMessage(channel, m);
 		//trace("Done sending message");
@@ -30,19 +33,6 @@ class ServerConnection extends hxbit.NetworkHost.NetworkClient {
 	override function stop() {
 		super.stop();
 		_client.disconnect();
-	}
-	public function process(m : yojimbo.Native.Message,  channel = 0) {
-		var len = -1;
-		var b : hl.Bytes = m.accessPayload(len);
-		var bytes = b.toBytes(len);
-		if (len > 0 && b != null) {
-			var input = new haxe.io.BytesInput(bytes, 0, len);
-			this.processMessagesData(bytes, 0, len);
-			//trace('message from server on channel ${channel} len: ${len} msg: ${Base64.encode(bytes)}' );
-		} else {
-			trace("Empty bytes?");
-		}
-		
 	}
 }
 

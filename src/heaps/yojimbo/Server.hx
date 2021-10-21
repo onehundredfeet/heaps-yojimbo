@@ -4,10 +4,11 @@ import haxe.crypto.Base64;
 import hl.Bytes;
 import haxe.io.UInt8Array;
 
-class ClientConnection extends hxbit.NetworkHost.NetworkClient {
+class ClientConnection extends ConnectionBase {
     var _server : yojimbo.Native.Server;
     var _clientIdx : Int;
 	var _clientID : Int;
+	public var HXBIT_CHANNEL = 0;
 
 	public function IDX() : Int {
 		return _clientIdx;
@@ -15,48 +16,27 @@ class ClientConnection extends hxbit.NetworkHost.NetworkClient {
 	public function ID() : Int {
 		return _clientID;
 	}
-	
+
 	public function new(host : Server, server : yojimbo.Native.Server, idx) {
 		super(host);
         _server = server;
         _clientIdx = idx;
 		_clientID = server.getClientId(idx);
 	}
+	
 	override function error(msg:String) {
 		super.error(msg);
 	}
-	override function send( bytes : haxe.io.Bytes ) {
-//		trace("Sending to client '" + Base64.encode(bytes) + "'");
-        var m = _server.createMessage(_clientIdx);
+
+	override function send( bytes : haxe.io.Bytes  ) {
+		sendMsg( Common.MT_HEAPS, bytes, HXBIT_CHANNEL);
+	}
+
+	public function sendMsg( msgType : Int, bytes : haxe.io.Bytes,  channel : Int) {
+	//		trace("Sending to client '" + Base64.encode(bytes) + "'");
+		var m = _server.createMessage(_clientIdx, msgType);
 		m.setPayload( bytes.getData(), bytes.length );
-        _server.sendMessage(_clientIdx, 0, m);
-
-	}
-	override function stop() {
-	}
-
-	public function process(m : yojimbo.Native.Message,  channel = 0) {
-		var len = -1;
-		var b : hl.Bytes = m.accessPayload(len);
-		var bytes = b.toBytes(len);
-		if (len > 0 && b != null) {
-		//	trace("Processing bytes of length " + bytes.length);
-		//	trace('message from client ${_clientID} on channel ${channel} len: ${len} msg: ${Base64.encode(bytes)}' );
-			this.processMessagesData(bytes, 0, len);
-		} else {
-			trace("Empty bytes?");
-		}
-		
-	}
-
-	public function processOld(m : yojimbo.Native.Message,  channel = 0) {
-		
-		var len = -1;
-		var b : Bytes = m.accessPayload(len);
-		var bytes = b.toBytes(len);
-		//trace("Message from client: " + _clientIdx + " len: " + len);
-
-//		this.processMessage(bytes,0);
+		_server.sendMessage(_clientIdx, channel, m);
 	}
 
 }

@@ -10,6 +10,8 @@ final  ProtocolId = 0x11223344; //.make(,0x556677);
 final ClientPort = 30000;
 final ServerPort = 40000;
 
+final MT_HEAPS = 0;
+
 var initialized = false;
 function initialize() {
     if (!initialized) {
