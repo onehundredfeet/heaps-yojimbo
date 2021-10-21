@@ -29,5 +29,14 @@
 			"cwd": "${workspaceFolder}",
 			"program": "bin/loopback.hl"
 		},
+		{
+			"name": "Signals",
+			"type": "hl",
+			"request": "launch",
+			"preLaunchTask": "HL/JIT (signals)",
+			"hxml": "compile.signals.hxml",
+			"cwd": "${workspaceFolder}",
+			"program": "bin/signals.hl"
+		},
 	]
 }

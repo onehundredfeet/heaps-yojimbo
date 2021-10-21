@@ -52,6 +52,8 @@ class ClientBase extends Host {
 	var _clientID : Int;
 	var _connected = false;
 
+	public var onConnected : (c : ServerConnection) -> Void;
+
 	public function id() {
 		return _clientID;
 	}
@@ -93,6 +95,9 @@ class ClientBase extends Host {
 				_connection = new ServerConnection(this, _client, 0);
 				self = _connection;
 				clients = [_connection];
+				if (onConnected != null) {
+					onConnected(_connection);
+				}
 			}
 
 			var channel = 0;

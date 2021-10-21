@@ -2,3 +2,4 @@ bin/server.hl
 .DS_Store
 bin/client.hl
 bin/loopback.hl
+bin/signals.hl
