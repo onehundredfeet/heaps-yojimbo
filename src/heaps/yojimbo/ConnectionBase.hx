@@ -2,16 +2,19 @@ package heaps.yojimbo;
 
 
 class ConnectionBase extends hxbit.NetworkHost.NetworkClient {
-	var _handlers : Array< (yojimbo.Native.Message, Int) -> Void > = [];
-	
-	public function setHandler(  msgType : Int,  f : (yojimbo.Native.Message, Int) -> Void) {
+	var _handlers : Array< (hxbit.NetworkHost.NetworkClient, yojimbo.Native.Message, Int, Dynamic) -> Void > = [];
+	var _handlerData : Array<Dynamic> = [];
+
+	public function setHandler(  msgType : Int,  f : (hxbit.NetworkHost.NetworkClient, yojimbo.Native.Message, Int, Dynamic) -> Void, d : Dynamic) {
 		if (msgType < 1) {
 			throw ("Msg type must be greater than 0");
 		}
 		if (_handlers.length <= msgType) {
 			_handlers.resize( msgType + 1);
+			_handlerData.resize(msgType + 1);
 		}
 		_handlers[msgType] =  f;
+		_handlerData[msgType] = d;
 	}
 
 
@@ -20,9 +23,11 @@ class ConnectionBase extends hxbit.NetworkHost.NetworkClient {
 		var b : hl.Bytes = m.accessPayload(len);
 		var bytes = b.toBytes(len);
 		if (len > 0 && b != null) {
-			switch(m.getType()) {
+			var mt = m.getType();
+
+			switch(mt) {
 				case Common.MT_HEAPS:this.processMessagesData(bytes, 0, len);
-				default: if (_handlers[m.getType()] != null) _handlers[m.getType()](m, channel);
+				default: if (_handlers[mt] != null) _handlers[mt](this, m, channel, _handlerData[mt]);
 			}
 		//	trace("Processing bytes of length " + bytes.length);
 		//	trace('message from client ${_clientID} on channel ${channel} len: ${len} msg: ${Base64.encode(bytes)}' );

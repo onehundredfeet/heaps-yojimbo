@@ -114,6 +114,9 @@ class ClientBase extends Host {
 		}
 	}
 
+	static function setSelf( s : ClientBase) {
+		_self = s;
+	}
 	static var  _self : ClientBase;
 }
 
@@ -136,7 +139,7 @@ class Client extends ClientBase {
 		_allocator = yojimbo.Native.Allocator.getDefault();
 		_adapter = new Adapter();
 		_clientID = clientID;
-		ClientBase._self = this;
+		ClientBase.setSelf(this);
 	}
 
 	// This will stall until we get a response
