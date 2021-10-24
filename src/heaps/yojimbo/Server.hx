@@ -4,43 +4,6 @@ import haxe.crypto.Base64;
 import hl.Bytes;
 import haxe.io.UInt8Array;
 
-class ClientConnection extends ConnectionBase {
-    var _server : yojimbo.Native.Server;
-    var _clientIdx : Int;
-	var _clientID : Int;
-	public var HXBIT_CHANNEL = 0;
-
-	public function IDX() : Int {
-		return _clientIdx;
-	}
-	public function ID() : Int {
-		return _clientID;
-	}
-
-	public function new(host : Server, server : yojimbo.Native.Server, idx) {
-		super(host);
-        _server = server;
-        _clientIdx = idx;
-		_clientID = server.getClientId(idx);
-	}
-	
-	override function error(msg:String) {
-		super.error(msg);
-	}
-
-	override function send( bytes : haxe.io.Bytes  ) {
-		sendMsg( Common.MT_HEAPS, bytes, HXBIT_CHANNEL);
-	}
-
-	public function sendMsg( msgType : Int, bytes : haxe.io.Bytes,  channel : Int) {
-	//		trace("Sending to client '" + Base64.encode(bytes) + "'");
-		var m = _server.createMessage(_clientIdx, msgType);
-		m.setPayload( bytes.getData(), bytes.length );
-		_server.sendMessage(_clientIdx, channel, m);
-	}
-
-}
-
 class Server extends Host {
 	var connected = false;
     var _adapter : yojimbo.Native.Adapter;
@@ -82,16 +45,18 @@ class Server extends Host {
         _server.start( MaxClients );
 
 		this.makeAlive();
+		
     }
 
 	public function startLookupback( clientID, time : Float) {
+		trace ("A");
 		var address = new yojimbo.Native.Address( "0.0.0.0", ClientPort );
 		_loopbackClient = new yojimbo.Native.Client(_allocator, address, config, _adapter, time );
 
 		_adapter.bindLoopbackClient(_loopbackClient);
 		_adapter.bindLoopbackServer(_server);
 
-		var c = new Client.LoopbackClient(_loopbackClient);
+		var c = new LoopbackClient(_loopbackClient);
 
 		_loopbackClient.connectLoopback(0, clientID, MaxClients);
 		_server.connectLoopbackClient(0, clientID, null);
