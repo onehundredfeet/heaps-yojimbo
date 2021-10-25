@@ -3,3 +3,4 @@ bin/server.hl
 bin/client.hl
 bin/loopback.hl
 bin/signals.hl
+bin

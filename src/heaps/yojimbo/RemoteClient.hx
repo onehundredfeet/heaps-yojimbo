@@ -12,10 +12,10 @@ class RemoteClient extends ClientBase {
 	
 	public function new(clientID) {
 		super();
-		Common.initialize();
 		_allocator = yojimbo.Native.Allocator.getDefault();
 		_adapter = new Adapter();
 		_clientID = clientID;
+		
 		ClientBase.setSelf(this);
 	}
 
@@ -50,8 +50,8 @@ class RemoteClient extends ClientBase {
 
 	public function connect( time ) {
 		close();
-		isAuth = false;
-		var address = new Address("0.0.0.0", ClientPort);
+
+		var address = new Address("0.0.0.0", ClientPort + 1);
 
 		_client = new yojimbo.Native.Client(_allocator, address, config, _adapter, time);
 		
@@ -76,7 +76,6 @@ class RemoteClient extends ClientBase {
 	override function dispose() {
 		close();
 		super.dispose();
-		Common.shutdown();
 	}
 
 	function onConnection() {

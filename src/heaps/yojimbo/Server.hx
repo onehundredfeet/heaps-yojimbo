@@ -27,7 +27,7 @@ class Server extends Host {
 		super();
 		isAuth = true;
 //		trace("New");
-		Common.initialize();
+		
 		_allocator = yojimbo.Native.Allocator.getDefault();
 	}
 
@@ -48,7 +48,7 @@ class Server extends Host {
 		
     }
 
-	public function startLookupback( clientID, time : Float) {
+	public function startLoopback( clientID, time : Float) {
 		trace ("A");
 		var address = new yojimbo.Native.Address( "0.0.0.0", ClientPort );
 		_loopbackClient = new yojimbo.Native.Client(_allocator, address, config, _adapter, time );
@@ -131,7 +131,6 @@ class Server extends Host {
     }
 	public function stop() {
         _server.stop();
-		Common.shutdown();
 	}
 
 	override function dispose() {

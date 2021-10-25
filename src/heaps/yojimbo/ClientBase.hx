@@ -8,8 +8,16 @@ class ClientBase extends Host {
 	var _clientID : Int;
 	var _connected = false;
 
+	public function new() {
+		super();
+		isAuth = false;
+	}
 	public var onConnected : (c : ServerConnection) -> Void;
 
+	public  function connected() {
+		if (_client == null) return false;
+		return _client.isConnected() && _connected;
+	}
 	public function id() {
 		return _clientID;
 	}

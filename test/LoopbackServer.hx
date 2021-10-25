@@ -30,7 +30,7 @@ class LoopbackServer {
         }
         
         server.start("127.0.0.1", heaps.yojimbo.Common.ServerPort, time);
-        var client = server.startLookupback(0, time);
+        var client = server.startLoopback(0, time);
         
         while(true) {
             client.incomingUpdate( time, dt);

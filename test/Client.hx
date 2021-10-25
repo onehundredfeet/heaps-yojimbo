@@ -7,7 +7,7 @@ import hxd.Rand;
 class Client {
 
     static var _player : Player;
-    static var _client : heaps.yojimbo.Client;
+    static var _client : heaps.yojimbo.RemoteClient;
 
     public static function onPlayer(p : Player) {
         if (_player == null) {
@@ -27,7 +27,7 @@ class Client {
         // Hosts a secure server which requires a matcher to be running
         // Insecure server TBD
         //
-        _client = new heaps.yojimbo.Client(Std.random(10000));
+        _client = new heaps.yojimbo.RemoteClient(Std.random(10000));
 
         var time = 0.;
         var dt = 0.1;
