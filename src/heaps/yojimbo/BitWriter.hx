@@ -1,5 +1,7 @@
 package heaps.yojimbo;
 
+import haxe.crypto.Base64;
+
 class BitWriter {
 	var _out:haxe.io.BytesBuffer;
     var _bitHead = 0;
@@ -9,6 +11,9 @@ class BitWriter {
 		flushBits();
 
 		return _out.getBytes();
+	}
+	public function asHex() {
+		return Base64.encode(_out.getBytes());
 	}
 	public function new(b:haxe.io.BytesBuffer = null) {
 
@@ -44,7 +49,7 @@ class BitWriter {
 		}
 	}
 
-	public function addBits(v:UInt, bits:UInt) {
+	 function addBits(v:UInt, bits:UInt) {
 		if (bits > getAvailableBits())
 			bits = getAvailableBits();
 

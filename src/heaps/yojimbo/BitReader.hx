@@ -4,7 +4,9 @@ class BitReader {
 	public function new(b:haxe.io.Bytes) {
 		_in = b;
 	}
-
+	public function asHex() {
+		return haxe.crypto.Base64.encode(_in);
+	}
 	var _in:haxe.io.Bytes;
 	var _inPos = 0;
 	var _bitHead = 8;

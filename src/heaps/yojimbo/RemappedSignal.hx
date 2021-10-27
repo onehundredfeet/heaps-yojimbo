@@ -23,7 +23,7 @@ class RemappedSignal extends IntSignal {
 	public function pushRemapped( x : Float ) : Float{
 		var c = Math.min( _max, Math.max( _min, x ));
 		var y = Math.round((c - _min) * _inverseScaled);
-		var q = push( y );
+		var q : Float = push( y );
 
 		return (q * _rangeScaled) + _min;
 	}
