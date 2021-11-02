@@ -45,17 +45,17 @@ class IntSignal implements SerializableSignal {
 	function relativeIndex(i : Int) {
 		return (_loc - i + _history.length) % _history.length;
 	}
-	public function write(ctx:BitWriter) {
+	public function write(ctx:BitWriter, depth : Int) {
 
 		switch (_compression) {
 			case ESignalCompression.BIT:
-				for (i in 0..._history.length) {
+				for (i in 0...depth) {
 					var idx = relativeIndex(i);
 					ctx.addInt(_history[idx], _bits);
 				}
 			case ESignalCompression.UNIQUE:
 				var x = 0;
-				for (i in 0..._history.length) {
+				for (i in 0...depth) {
 					var idx = relativeIndex(i);
 					if (_history[idx] != x) {
 						ctx.addBool(true);
@@ -68,13 +68,13 @@ class IntSignal implements SerializableSignal {
             case ESignalCompression.RLE:
                 var x = 0;
                 var i = 0;
-				while (i < _history.length) {
+				while (i < depth) {
 					var idx = relativeIndex(i);
                     x = _history[idx];
                     ctx.addInt(x, _bits);
 
                     var headCount = i + 1;
-                    while (headCount < _history.length) {
+                    while (headCount < depth) {
                         var headIdx = relativeIndex(headCount); 
                         if (_history[headIdx] != x)
                             break;
@@ -98,17 +98,17 @@ class IntSignal implements SerializableSignal {
 		}
 	}
 
-	public function read(ctx:BitReader) {
+	public function read(ctx:BitReader, depth : Int) {
 		_loc = 0;
 
 		switch (_compression) {
 			case ESignalCompression.BIT:
-                for (i in 0..._history.length) {
+                for (i in 0...depth) {
 					_history[relativeIndex(i)] = ctx.getInt(_bits);
 				}
 			case ESignalCompression.UNIQUE:
 				var x = 0;
-				for (i in 0..._history.length) {
+				for (i in 0...depth) {
 					if (ctx.getBool()) {
 						x = ctx.getInt(_bits);
 					}
@@ -118,7 +118,7 @@ class IntSignal implements SerializableSignal {
 			case RLE:
 				var x = 0;
                 var i = 0;
-				while (i < _history.length) {
+				while (i < depth) {
 					x = ctx.getInt(_bits);
 					if (ctx.getBool()) {
 						//run
