@@ -4,3 +4,4 @@ bin/client.hl
 bin/loopback.hl
 bin/signals.hl
 bin
+dump

@@ -7,7 +7,7 @@ import  haxe.crypto.Base64;
 import Float2;
 
 final  ProtocolId = 0x11223344; //.make(,0x556677);
-final ClientPort = 30000;
+final ClientPort = 30001;
 final ServerPort = 40000;
 
 final MT_HEAPS = 0;
@@ -167,8 +167,10 @@ class NetSerializable implements hxbit.NetworkSerializable {
         h.register(this);
     }
     public function stopReplication() {
-        __host.register(this);
-        __host = null;
+        if (__host != null) {
+            __host.unregister(this);
+            __host = null;
+        }
     }
 }
 

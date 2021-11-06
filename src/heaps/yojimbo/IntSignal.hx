@@ -7,8 +7,8 @@ enum ESignalCompression {
 }
 
 interface SerializableSignal {
-	 function write(ctx:BitWriter) : Void;
-	 function read(ctx:BitReader) : Void;
+	 function write(ctx:BitWriter, depth : Int) : Void;
+	 function read(ctx:BitReader, depth : Int) : Void;
 }
 
 class IntSignal implements SerializableSignal {
