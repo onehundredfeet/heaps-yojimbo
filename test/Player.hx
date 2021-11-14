@@ -3,7 +3,7 @@ package test;
 import heaps.yojimbo.Common.compressFloat;
 import heaps.yojimbo.Common.decompressFloat;
 import haxe.EnumTools;
-
+import hvector.*;
 
 class Player extends heaps.yojimbo.Common.NetSerializable {
     @:s var color : Int;

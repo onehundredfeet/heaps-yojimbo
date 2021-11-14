@@ -4,7 +4,7 @@ package heaps.yojimbo;
 import yojimbo.Native;
 import sys.io.File;
 import  haxe.crypto.Base64;
-import Float2;
+import hvector.Float2;
 
 final  ProtocolId = 0x11223344; //.make(,0x556677);
 final ClientPort = 30001;
