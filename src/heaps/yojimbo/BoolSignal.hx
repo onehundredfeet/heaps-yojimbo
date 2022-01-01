@@ -4,8 +4,9 @@ package heaps.yojimbo;
 using heaps.yojimbo.IntSignal;
 
 class BoolSignal extends IntSignal {
-	public function new(historyDepth:Int, compression:ESignalCompression, def:Int = 0, runBits:Int = 3) {
-		super(1, 0, historyDepth, compression, def, runBits);
+	public function new(historyDepth:Int, compression:ESignalCompression, def:Int = 0) {
+		super(1, 0, historyDepth, compression, def);
+
 	}
 
 	public function pushBool( v : Bool ) : Bool {

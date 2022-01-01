@@ -7,6 +7,9 @@ class BitWriter {
     var _bitHead = 0;
     var _bitByte = 0;
 
+	public function bitLength() {
+		return _out.length * 8 + _bitHead; 
+	}
 	public function getBytes() {
 		flushBits();
 

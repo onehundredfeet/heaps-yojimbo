@@ -1,9 +1,13 @@
 package heaps.yojimbo;
 
+import h2d.Bitmap;
+
+// Delta bits include sign bit, i.e. 1 is not a legal value
 enum ESignalCompression {
-	BIT;
+	RAW;
 	UNIQUE;
-	RLE;
+	DELTA(deltaBits : Int);
+	RLE(runBits : Int);
 }
 
 interface SerializableSignal {
@@ -18,16 +22,32 @@ class IntSignal implements SerializableSignal {
 	var _loc = -1;
 	var _mask:UInt = 0;
 	var _compression:ESignalCompression;
-	var _runBits = 3;
 
-	public function new(bits, min, historyDepth:Int, compression:ESignalCompression, def:Int = 0, runBits:Int = 3) {
+	var _runBits = 0;
+	var _runMax = 0;
+	var _deltaBits = -1;
+	var _deltaMax = 0;
+	var _deltaMask:UInt = 0;
+
+
+	public function new(bits, min, historyDepth:Int, compression:ESignalCompression,  defaultValue:Int = 0) {
 		_bits = bits;
 		_offset = min;
-		_history = [for (c in 0...historyDepth) def];
+		_history = [for (c in 0...historyDepth) defaultValue];
 		final MASK:UInt = 0xffffffff;
 		_mask = MASK >> (32 - _bits);
 		_compression = compression;
-		_runBits = runBits;
+		switch(compression) {
+			case RLE(runBits): 
+				_runBits = runBits;
+				_runMax = ((1 << _runBits) - 1);
+			case DELTA(deltaBits): 
+				if(deltaBits <= 1) throw "Delta bits must be greater than 1";
+				_deltaBits = deltaBits - 1; 
+				_deltaMax = (1 << _deltaBits); // isn't -1 because we don't use 0
+				_deltaMask = MASK >> (32 - _deltaBits);
+			default:
+		}
 	}
 
 	public function push(v:Int) : Int {
@@ -45,10 +65,11 @@ class IntSignal implements SerializableSignal {
 	function relativeIndex(i : Int) {
 		return (_loc - i + _history.length) % _history.length;
 	}
+
 	public function write(ctx:BitWriter, depth : Int) {
 
 		switch (_compression) {
-			case ESignalCompression.BIT:
+			case ESignalCompression.RAW:
 				for (i in 0...depth) {
 					var idx = relativeIndex(i);
 					ctx.addInt(_history[idx], _bits);
@@ -65,15 +86,42 @@ class IntSignal implements SerializableSignal {
 						ctx.addBool(false);
 					}
 				}
-            case ESignalCompression.RLE:
+			case ESignalCompression.DELTA(_):
+				var x = 0;
+				for (i in 0...depth) {
+					var idx = relativeIndex(i);
+					if (_history[idx] != x) {
+						ctx.addBool(true);
+						var xn = _history[idx];
+						var d = xn - x;
+						x = xn;
+						if (d < 0 && -d <= _deltaMax) {
+							ctx.addBool(true);
+							ctx.addBool(true);
+							ctx.addInt(((-d) - 1) & _deltaMask, _deltaBits);
+						} else if (d > 0 && d <= _deltaMax) {
+							ctx.addBool(true);
+							ctx.addBool(false);
+							ctx.addInt((d - 1) & _deltaMask, _deltaBits);
+						} else {
+							ctx.addBool(false);
+							ctx.addInt(x & _mask, _bits);
+						}
+					} else {
+						ctx.addBool(false);
+					}
+				}
+            case ESignalCompression.RLE(_):
                 var x = 0;
                 var i = 0;
+
 				while (i < depth) {
 					var idx = relativeIndex(i);
                     x = _history[idx];
                     ctx.addInt(x, _bits);
 
                     var headCount = i + 1;
+					
                     while (headCount < depth) {
                         var headIdx = relativeIndex(headCount); 
                         if (_history[headIdx] != x)
@@ -87,8 +135,8 @@ class IntSignal implements SerializableSignal {
 					} else {
 						ctx.addBool(true);
 						delta -= 2;
-						if (delta > 7) {
-							delta = 7;
+						if (delta > _runMax) {
+							delta = _runMax;
 						}
 						ctx.addInt(delta, _runBits );
 						i += delta + 2;
@@ -102,7 +150,7 @@ class IntSignal implements SerializableSignal {
 		_loc = 0;
 
 		switch (_compression) {
-			case ESignalCompression.BIT:
+			case ESignalCompression.RAW:
                 for (i in 0...depth) {
 					_history[relativeIndex(i)] = ctx.getInt(_bits);
 				}
@@ -115,7 +163,26 @@ class IntSignal implements SerializableSignal {
 					_history[relativeIndex(i)] = x;
 					
 				}
-			case RLE:
+			case ESignalCompression.DELTA(_):
+				var x = 0;
+				for (i in 0...depth) {
+					// is there a change?
+					if (ctx.getBool()) {
+						// is the change small?
+						if (ctx.getBool()) {
+							//small
+							// Is it negative? 
+							var d = ctx.getBool() ?  - ctx.getInt(_deltaBits) - 1 : ctx.getInt(_deltaBits) + 1; // Adds 1 to magnitude
+							x = x + d;
+						} else {
+							//normal
+							x = ctx.getInt(_bits);
+						}
+					}
+					_history[relativeIndex(i)] = x;
+					
+				}
+			case ESignalCompression.RLE(_):
 				var x = 0;
                 var i = 0;
 				while (i < depth) {

@@ -56,7 +56,7 @@ class Player extends heaps.yojimbo.Common.NetSerializable {
 
 
     public function moveF( x : Float, y : Float, a : Float) {
-        move( compressFloat(x, ORIGIN, DOMAIN, BITS),compressFloat(y, ORIGIN, DOMAIN, BITS), compressFloat(AngleF.bound(a), 0., ADOMAIN, ABITS) );
+        move( compressFloat(x, ORIGIN, DOMAIN, BITS),compressFloat(y, ORIGIN, DOMAIN, BITS), compressFloat(hvector.AngleF.bound(a), 0., ADOMAIN, ABITS) );
     }
 
     @:rpc(immediate) public function move( x : Int, y : Int, a : Int) {
