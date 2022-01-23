@@ -49,7 +49,6 @@ class Server extends Host {
     }
 
 	public function startLoopback( clientID, time : Float) {
-		trace ("A");
 		var address = new yojimbo.Native.Address( "0.0.0.0", ClientPort );
 		_loopbackClient = new yojimbo.Native.Client(_allocator, address, config, _adapter, time );
 
@@ -86,7 +85,7 @@ class Server extends Host {
 
             if (_adapter.getEventType() == yojimbo.Native.HLEventType.HLYOJIMBO_CLIENT_CONNECT) {
 				var cid = _adapter.getClientIndex();
-                trace("Client conected " + cid);
+                //trace("Client conected " + cid);
                 clientsIdx.push(cid);
 				var c = new ClientConnection(this, _server, cid);
 				_clients.push(c);
@@ -96,7 +95,7 @@ class Server extends Host {
 				}
             } else if (_adapter.getEventType() == yojimbo.Native.HLEventType.HLYOJIMBO_CLIENT_DISCONNECT) {
 				var cid = _adapter.getClientIndex();
-                trace("Client disconected " + cid);
+                //trace("Client disconected " + cid);
                 clientsIdx.remove(cid);
 				for(c in _clients) {
 					if (c.IDX() == cid) {

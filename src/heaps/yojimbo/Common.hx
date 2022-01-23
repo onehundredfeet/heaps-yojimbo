@@ -166,7 +166,7 @@ class NetSerializable implements hxbit.NetworkSerializable
 {
     public function startReplication(h : Host) {
         __host = h;
-        h.register(this);
+        h.register(this);   // __host is also set in here?
     }
     public function stopReplication() {
         if (__host != null) {
