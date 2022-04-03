@@ -2,10 +2,12 @@ package test;
 
 import heaps.yojimbo.Common.compressFloat;
 import heaps.yojimbo.Common.decompressFloat;
+import heaps.yojimbo.NetSerializable;
+
 import haxe.EnumTools;
 import hvector.*;
 
-class Player extends heaps.yojimbo.Common.NetSerializable {
+class Player extends NetSerializable {
     @:s var color : Int;
 	@:s public var uid : Int;
     @:s var name : String;

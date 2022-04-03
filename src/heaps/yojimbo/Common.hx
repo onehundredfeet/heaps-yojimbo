@@ -41,6 +41,19 @@ function loadCertificate(cert_file) : haxe.io.Bytes{
     return certBytes;
 }
 
+
+function compressFloat( x : Float, o : Float, s : Float, bits : Int ) : Int {
+    final MAX_INTF : Float = ((1 << bits) - 1);
+    var a = (x - o) * (MAX_INTF / s );
+    return Math.floor(a);
+}
+function decompressFloat( x : Int, o : Float, s : Float, bits : Int ) : Float {
+    final MAX_INTF : Float = ((1 << bits) - 1);
+    var a = x * (s / MAX_INTF) + o;
+    return a;
+}
+
+#if false
 class Float2Serializable implements hxbit.Serializable  {
     public function new (x, y) {
         this.x = x;
@@ -61,16 +74,6 @@ class Float2Serializable implements hxbit.Serializable  {
 
 }
 
-function compressFloat( x : Float, o : Float, s : Float, bits : Int ) : Int {
-    final MAX_INTF : Float = ((1 << bits) - 1);
-    var a = (x - o) * (MAX_INTF / s );
-    return Math.floor(a);
-}
-function decompressFloat( x : Int, o : Float, s : Float, bits : Int ) : Float {
-    final MAX_INTF : Float = ((1 << bits) - 1);
-    var a = x * (s / MAX_INTF) + o;
-    return a;
-}
 
 class QuantizedVector2 implements hxbit.Serializable  {
 
@@ -148,7 +151,7 @@ class User implements hxbit.Serializable {
     @:s public var age : Int;
     @:s public var friends : Array<User>;    
 }
-
+#end
 /*
 	static function enableReplication( o : NetworkSerializable, b : Bool ) {
 		if( b ) {
@@ -162,20 +165,8 @@ class User implements hxbit.Serializable {
 	}
 */
 
-class NetSerializable implements hxbit.NetworkSerializable 
-{
-    public function startReplication(h : Host) {
-        __host = h;
-        h.register(this);   // __host is also set in here?
-    }
-    public function stopReplication() {
-        if (__host != null) {
-            __host.unregister(this);
-            __host = null;
-        }
-    }
-}
 
+#if false
 class Cursor extends NetSerializable {
 
 	@:s var color : Int;
@@ -223,7 +214,7 @@ class Cursor extends NetSerializable {
 	}
 
 }
-
+#end
 
 
 /*
