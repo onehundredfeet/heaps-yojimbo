@@ -11,7 +11,7 @@ class RemoteClient extends ClientBase {
 	var _adapter : yojimbo.Native.Adapter;
 	
 	public function new(clientID) {
-		super();
+		super(true);
 		_allocator = yojimbo.Native.Allocator.getDefault();
 		_adapter = new Adapter();
 		_clientID = clientID;

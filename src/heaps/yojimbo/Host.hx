@@ -6,12 +6,12 @@ package heaps.yojimbo;
 class Host extends hxbit.NetworkHost {
 	var config : yojimbo.Native.ClientServerConfig;
 
-	public function new () {
+	public function new (resetStatics : Bool) {
 		if (hxbit.NetworkHost.current != null) {
 //			throw "Can not have more than one host";
 		}
 		
-		super();
+		super(resetStatics);
 		config = getConfig();
 	}
 

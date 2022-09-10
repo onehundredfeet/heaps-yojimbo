@@ -15,6 +15,7 @@ final MT_HEAPS = 0;
 var initialized = false;
 function initialize( maxMessageTypes : Int) {
     if (!initialized) {
+        yojimbo.Native.Yojimbo.cacheStringType("");
         yojimbo.Native.Yojimbo.setMaxMessageTypes(maxMessageTypes);
         yojimbo.Native.Yojimbo.initialize();
         initialized = true;

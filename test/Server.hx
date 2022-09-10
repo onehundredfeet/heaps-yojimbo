@@ -3,6 +3,8 @@ package test;
 class Server {
 
     public static function main() {
+        yojimbo.Native.Yojimbo.logLevel(yojimbo.Native.LogLevel.YOJIMBO_LOG_LEVEL_INFO);
+		heaps.yojimbo.Common.initialize(5);
 
         //
         // Hosts a secure server which requires a matcher to be running

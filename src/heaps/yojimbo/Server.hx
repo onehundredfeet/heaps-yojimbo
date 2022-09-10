@@ -23,11 +23,11 @@ class Server extends Host {
     var clientsIdx : Array<Int> = [];
 	var _clients : Array<ClientConnection> = [];
 
+	static var initialized = false;
 	public function new() {
-		super();
+		super(true);
 		isAuth = true;
-//		trace("New");
-		
+
 		_allocator = yojimbo.Native.Allocator.getDefault();
 	}
 

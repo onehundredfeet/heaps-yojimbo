@@ -1,3 +1,4 @@
 compile-common.hxml
 -hl bin/server.hl
+--dce full
 --main test.Server
