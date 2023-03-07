@@ -1,5 +1,4 @@
 package heaps.yojimbo;
-import heaps.yojimbo.Common.ClientPort;
 import haxe.crypto.Base64;
 import hl.Bytes;
 import haxe.io.UInt8Array;
@@ -24,8 +23,8 @@ class Server extends Host {
 	var _clients : Array<ClientConnection> = [];
 
 	static var initialized = false;
-	public function new() {
-		super(true);
+	public function new(protocolID : Int) {
+		super(true, protocolID);
 		isAuth = true;
 
 		_allocator = yojimbo.Native.Allocator.getDefault();
@@ -39,7 +38,6 @@ class Server extends Host {
 
         _server = new yojimbo.Native.Server( _allocator, privateKey, address, config, _adapter, time );
         
-        yojimbo.Native.Yojimbo.logLevel(yojimbo.Native.LogLevel.YOJIMBO_LOG_LEVEL_INFO);
 
 		trace("Starting");
         _server.start( MaxClients );
@@ -49,13 +47,13 @@ class Server extends Host {
     }
 
 	public function startLoopback( clientID, time : Float) {
-		var address = new yojimbo.Native.Address( "0.0.0.0", ClientPort );
+		var address = new yojimbo.Native.Address( "0.0.0.0", 0 );
 		_loopbackClient = new yojimbo.Native.Client(_allocator, address, config, _adapter, time );
 
 		_adapter.bindLoopbackClient(_loopbackClient);
 		_adapter.bindLoopbackServer(_server);
 
-		var c = new LoopbackClient(_loopbackClient);
+		var c = new LoopbackClient(_loopbackClient, _protocolID);
 
 		_loopbackClient.connectLoopback(0, clientID, MaxClients);
 		_server.connectLoopbackClient(0, clientID, null);

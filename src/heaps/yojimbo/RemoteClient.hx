@@ -10,8 +10,8 @@ class RemoteClient extends ClientBase {
 	var _connectionToken : haxe.io.Bytes;
 	var _adapter : yojimbo.Native.Adapter;
 	
-	public function new(clientID) {
-		super(true);
+	public function new(clientID, protocolID : Int) {
+		super(true, protocolID);
 		_allocator = yojimbo.Native.Allocator.getDefault();
 		_adapter = new Adapter();
 		_clientID = clientID;
@@ -21,7 +21,7 @@ class RemoteClient extends ClientBase {
 
 	// This will stall until we get a response
 	// Should make this async in the future
-	public function getMatchtoken(matcherHost, port, certificate : haxe.io.Bytes) {
+	public function getMatchtoken(matcherHost, port : Int, certificate : haxe.io.Bytes) {
 		_matcher = new yojimbo.Native.Matcher( _allocator );
 		
 		if (!_matcher.initialize(certificate, certificate.length)) {
@@ -29,7 +29,8 @@ class RemoteClient extends ClientBase {
 			return false;
 		}
 
-		_matcher.requestMatch(matcherHost, port, ProtocolId, _clientID, false);
+		trace('Requesting match from ' + matcherHost + ':' + port + ' for client ' + _clientID + ' with protocol ' + _protocolID);
+		_matcher.requestMatch(matcherHost, port, _protocolID, _clientID, false);
 
 		if (_matcher.getMatchStatus() == MatchStatus.MATCH_FAILED) {
 			trace("\nRequest match failed. Is the matcher running?\n");
@@ -48,16 +49,18 @@ class RemoteClient extends ClientBase {
 		return true;
 	}
 
-	public function connect( time ) {
+	public function connect( time, clientPort : Int, serverPort : Int ) {
 		close();
 
-		var address = new Address("0.0.0.0", ClientPort + 1);
+		var address = new Address("0.0.0.0", clientPort);
 
 		_client = new yojimbo.Native.Client(_allocator, address, config, _adapter, time);
 		
-		var serverAddress = new Address("127.0.0.1", ServerPort);
+		var serverAddress = new Address("127.0.0.1", serverPort);
 		trace("Connecting to (doesn't matter - secure connections get it from the connect token) " + serverAddress.toString());
 
+		trace('Connecting to ' + _clientID + ' with token ' + _connectionToken);
+		if (_connectionToken == null) throw "No connection token";
 		// Initiate connection, does not resolve immediately
 		_client.connect(_clientID, _connectionToken);
 

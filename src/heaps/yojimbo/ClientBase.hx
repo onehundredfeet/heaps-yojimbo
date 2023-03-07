@@ -8,8 +8,8 @@ class ClientBase extends Host {
 	var _clientID : Int;
 	var _connected = false;
 
-	public function new(resetStatics : Bool) {
-		super(resetStatics);
+	public function new(resetStatics : Bool, protocolID : Int) {
+		super(resetStatics, protocolID);
 		isAuth = false;
 	}
 	public var onConnected : (c : ServerConnection) -> Void;

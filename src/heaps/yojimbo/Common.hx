@@ -6,9 +6,9 @@ import sys.io.File;
 import haxe.crypto.Base64;
 import hvector.Float2;
 
-final  ProtocolId = 0x11223344; //.make(,0x556677);
-final ClientPort = 30001;
-final ServerPort = 40000;
+//final  ProtocolId = 0x11223344; //.make(,0x556677);
+//final ClientPort = 30001;
+//final ServerPort = 40000;
 
 final MT_HEAPS = 0;
 
